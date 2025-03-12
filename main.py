@@ -1,6 +1,6 @@
 import re
 
-def readSys():
+def read_system():
     system = []
     while True:
         equation = input()
@@ -77,16 +77,16 @@ def build_matrix(vars, pr_mtr, results, num_equations):
 
 def main():
     print("Introduceti ecuatiile sistemului: ")
-    system = readSys()
+    system = read_system()
     print("Ecuatiile introduse sunt:")
     display_system(system)
 
     # Parse the equations
-    vars, pr_mtr, results = parse_equations(system)
+    vars, pr_matrix, results = parse_equations(system)
 
     # Build the matrix
     num_equations = len(system)
-    matrix = build_matrix(vars, pr_mtr, results, num_equations)
+    matrix = build_matrix(vars, pr_matrix, results, num_equations)
 
     # Display the matrix
     print("Variabilele:", vars)
