@@ -75,9 +75,63 @@ def build_matrix(vars, pr_mtr, results, num_equations):
 
     return matrix
 
+
+
+# NOU #
+def modify_cols(matrix,cols):
+    if matrix[cols][cols+1] == 0:
+        return False
+    for (i,j) in enumerate(matrix):
+        # swap cols
+        aux = matrix[i][j]
+        matrix[i][j]=matrix[i][j+1]
+        matrix[i][j+1] = aux
+
+    return True,matrix
+
+def modify_rows(matrix,rows):
+    if matrix[rows+1][rows] == 0:
+        return False
+    for (i,j) in enumerate(matrix):
+        # swap rows
+
+        aux = matrix[i][j]
+        matrix[i][j]=matrix[i+1][j]
+        matrix[i+1][j] = aux
+
+    return True,matrix 
+
+
+
+def update_matrix(matrix):
+    
+    for i,rows in enumerate(matrix):
+        pivot = matrix[i][i]
+        if pivot != 0:
+            # fa metoda lui gauss
+            pass
+        else:
+            possible = modify_rows(matrix,rows)
+            if not possible:
+                modify_cols(matrix,rows)
+                #testare if -> Daca e false , matrice incompatibila
+            
+    return matrix
+# NOU #
+
 def main():
     print("Introduceti ecuatiile sistemului: ")
-    system = read_system()
+    #system = read_system()
+
+    # NOU #
+    system = [
+        "0+2y+3z = 5",
+        "2x+4y+5z = 5",
+        "5x+3y+7z = 5"
+    
+    ]
+    # NOU #
+    
     print("Ecuatiile introduse sunt:")
     display_system(system)
 
@@ -87,11 +141,36 @@ def main():
     # Build the matrix
     num_equations = len(system)
     matrix = build_matrix(vars, pr_matrix, results, num_equations)
+    print(matrix)
+    #NOU#
+    print("//////")
+    print(f"{update_matrix(matrix)}\n")
+    print("//////")
+    #NOU#
 
     # Display the matrix
     print("Variabilele:", vars)
     print("Matricea:")
-    for row in matrix:
-        print(row)
+    
 
 main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
+# git add .git commit -m "[text]" git push 
+#
+#
