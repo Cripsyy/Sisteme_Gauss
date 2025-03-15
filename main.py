@@ -1,19 +1,22 @@
 import re
 
+
 def read_system():
     system = []
     while True:
         equation = input()
-        if equation != "0":
+        if equation != "":
             system.append(equation)
         else:
             break
-        print("Introduceti alta ecuatie sau 0 pentru a opri")
+        print("Introduceti alta ecuatie sau Enter pentru a opri")
     return system
+
 
 def display_system(system):
     for i in range(0, len(system)):
         print(f"{{{system[i]}")
+
 
 def parse_equations(inp):
     vars = []  # List to store all unique variables
@@ -24,7 +27,8 @@ def parse_equations(inp):
         # Remove all spaces and split into left and right parts
         formula = formula.replace(" ", "")
         parts = formula.split("=")
-        results.append(int(parts[1]) if float(parts[1]).is_integer() else float(parts[1]))  # Store the constant term as a float
+        results.append(
+            int(parts[1]) if float(parts[1]).is_integer() else float(parts[1]))  # Store the constant term as a float
 
         # Split the left-hand side into terms
         terms = re.findall(r'([+-]?\d*\.?\d*\*?[a-zA-Z]+\d*)', parts[0])
@@ -46,7 +50,6 @@ def parse_equations(inp):
                 coef_part = re.match(r'(\d*\.?\d*)', term).group(1)
                 var = term[len(coef_part):]
 
-            # Handle implicit coefficient (e.g., "x1" -> coefficient is 1)
             if not coef_part:
                 coef = int(sign + '1')
             elif float(coef_part).is_integer():
@@ -54,14 +57,18 @@ def parse_equations(inp):
             else:
                 coef = float(sign + coef_part)
 
-            # Add variable to the list if not already present
-            if var not in vars:
-                vars.append(var)
+            if coef != 0:
+                # Add variable to the list if not already present
+                if var not in vars:
+                    vars.append(var)
 
-            # Store the coefficient in the dictionary
-            pr_mtr[(i, var)] = coef
+                # Store the coefficient in the dictionary
+                pr_mtr[(i, var)] = coef
+
+    vars.sort()
 
     return vars, pr_mtr, results
+
 
 def build_matrix(vars, pr_mtr, results, num_equations):
     # Initialize the matrix with zeros
@@ -73,65 +80,81 @@ def build_matrix(vars, pr_mtr, results, num_equations):
             matrix[i][j] = pr_mtr.get((i, var), 0)
         matrix[i][-1] = results[i]
 
+
     return matrix
 
 
+def switch_cols(matrix, current_index, vars):
+    n = len(matrix)
+    m = len(matrix[0]) - 1
+    index = current_index
+    row = current_index
+    # Check if the current row is the last row
+    while matrix[row][index] == 0:
+        if index + 1 >= m:
+            return False # Cannot swap, no collum to the right
+        # Swap the current collum with the collum to the right
+        index += 1
 
-# NOU #
-def modify_cols(matrix,cols):
-    if matrix[cols][cols+1] == 0:
-        return False
-    for (i,j) in enumerate(matrix):
-        # swap cols
-        aux = matrix[i][j]
-        matrix[i][j]=matrix[i][j+1]
-        matrix[i][j+1] = aux
+    # Interchange the collums
+    for row in range(n):
+        matrix[row][current_index], matrix[row][index] = matrix[row][index], matrix[row][current_index]
 
-    return True,matrix
+    # Interchange the variables
+    vars[current_index], vars[index] = vars[index], vars[current_index]
 
-def modify_rows(matrix,rows):
-    if matrix[rows+1][rows] == 0:
-        return False
-    for (i,j) in enumerate(matrix):
-        # swap rows
-
-        aux = matrix[i][j]
-        matrix[i][j]=matrix[i+1][j]
-        matrix[i+1][j] = aux
-
-    return True,matrix 
+    return matrix
 
 
+def switch_rows(matrix, current_index):
+    n = len(matrix)
+    index = current_index
+    col = current_index
+    # Check if the current row is the last row
+    while matrix[index][col] == 0:
+        if index + 1 >= n:
+            return False  # Cannot swap, no row below
+        # Swap the current row with the row below
+        index += 1
 
-def update_matrix(matrix):
-    
-    for i,rows in enumerate(matrix):
-        pivot = matrix[i][i]
-        if pivot != 0:
-            # fa metoda lui gauss
-            pass
+    # Interchange the rows
+    matrix[current_index], matrix[index] = matrix[index], matrix[current_index]
+    return True
+
+
+def gauss(matrix,vars):
+    n = len(matrix)
+
+    for index in range(n):
+        pivot = matrix[index][index]
+
+        if pivot == 0:
+            # Attempt to swap rows
+            if not switch_rows(matrix, index):
+                # Handle the case where swapping rows is not possible
+                if not switch_cols(matrix, index, vars):
+                    print("Sistemul este imcompatibil")
+                    break
+            for row in matrix:
+                print(row)
+            print(vars, "\n")
         else:
-            possible = modify_rows(matrix,rows)
-            if not possible:
-                modify_cols(matrix,rows)
-                #testare if -> Daca e false , matrice incompatibila
-            
+            #copiere linie pivot
+            #coloana pivot inlocuit cu 0
+            #regula dreptunghiului
+            pass
+
     return matrix
-# NOU #
+
 
 def main():
     print("Introduceti ecuatiile sistemului: ")
-    #system = read_system()
-
-    # NOU #
+    # system = read_system()
     system = [
-        "0+2y+3z = 5",
-        "2x+4y+5z = 5",
-        "5x+3y+7z = 5"
-    
+        "3z = 5",
+        "2*x+0.1y -5z = 5",
+        "5x-0y+7z = 5"
     ]
-    # NOU #
-    
     print("Ecuatiile introduse sunt:")
     display_system(system)
 
@@ -141,36 +164,16 @@ def main():
     # Build the matrix
     num_equations = len(system)
     matrix = build_matrix(vars, pr_matrix, results, num_equations)
-    print(matrix)
-    #NOU#
-    print("//////")
-    print(f"{update_matrix(matrix)}\n")
-    print("//////")
-    #NOU#
 
     # Display the matrix
     print("Variabilele:", vars)
     print("Matricea:")
-    
+    for row in matrix:
+        print(row)
+
+    # modify_rows(matrix, 0)
+    print()
+    gauss(matrix,vars)
+
 
 main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#
-# git add .git commit -m "[text]" git push 
-#
-#
