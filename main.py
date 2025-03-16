@@ -1,19 +1,27 @@
 import re
 
-def read_system():
+
+def input_system():
     system = []
     while True:
         equation = input()
-        if equation != "0":
+        if equation != "":
             system.append(equation)
         else:
             break
-        print("Introduceti alta ecuatie sau 0 pentru a opri")
+        print("Introduceti alta ecuatie sau Enter pentru a opri")
     return system
 
-def display_system(system):
+
+def print_system(system):
     for i in range(0, len(system)):
         print(f"{{{system[i]}")
+
+def print_matrix(matrix, vars):
+    print("----------------------------")
+    for row in matrix:
+        print(row)
+    print(vars, "\n")
 
 def parse_equations(inp):
     vars = []  # List to store all unique variables
@@ -46,7 +54,6 @@ def parse_equations(inp):
                 coef_part = re.match(r'(\d*\.?\d*)', term).group(1)
                 var = term[len(coef_part):]
 
-            # Handle implicit coefficient (e.g., "x1" -> coefficient is 1)
             if not coef_part:
                 coef = int(sign + '1')
             elif float(coef_part).is_integer():
@@ -54,14 +61,18 @@ def parse_equations(inp):
             else:
                 coef = float(sign + coef_part)
 
-            # Add variable to the list if not already present
-            if var not in vars:
-                vars.append(var)
+            if coef != 0:
+                # Add variable to the list if not already present
+                if var not in vars:
+                    vars.append(var)
 
-            # Store the coefficient in the dictionary
-            pr_mtr[(i, var)] = coef
+                # Store the coefficient in the dictionary
+                pr_mtr[(i, var)] = coef
+
+    vars.sort()
 
     return vars, pr_mtr, results
+
 
 def build_matrix(vars, pr_mtr, results, num_equations):
     # Initialize the matrix with zeros
@@ -73,67 +84,155 @@ def build_matrix(vars, pr_mtr, results, num_equations):
             matrix[i][j] = pr_mtr.get((i, var), 0)
         matrix[i][-1] = results[i]
 
+
     return matrix
 
 
+def switch_cols(matrix, current_index, vars):
+    n = len(matrix)
+    m = len(matrix[0]) - 1
+    index = current_index
+    row = current_index
+    # Check if the current row is the last row
+    while matrix[row][index] == 0:
+        if index + 1 >= m:
+            return False # Cannot swap, no collum to the right
+        # Swap the current collum with the collum to the right
+        index += 1
 
-# NOU #
-def modify_cols(matrix,cols):
-    if matrix[cols][cols+1] == 0:
-        return False
-    for (i,j) in enumerate(matrix):
-        # swap cols
-        aux = matrix[i][j]
-        matrix[i][j]=matrix[i][j+1]
-        matrix[i][j+1] = aux
+    # Interchange the collums
+    for row in range(n):
+        matrix[row][current_index], matrix[row][index] = matrix[row][index], matrix[row][current_index]
 
-    return True,matrix
+    # Interchange the variables
+    vars[current_index], vars[index] = vars[index], vars[current_index]
 
-def modify_rows(matrix,rows):
-    if matrix[rows+1][rows] == 0:
-        return False
-    for (i,j) in enumerate(matrix):
-        # swap rows
-
-        aux = matrix[i][j]
-        matrix[i][j]=matrix[i+1][j]
-        matrix[i+1][j] = aux
-
-    return True,matrix 
+    return matrix
 
 
+def switch_rows(matrix, current_index):
+    n = len(matrix)
+    index = current_index
+    col = current_index
+    # Check if the current row is the last row
+    while matrix[index][col] == 0:
+        if index + 1 >= n:
+            return False  # Cannot swap, no row below
+        # Swap the current row with the row below
+        index += 1
 
-def update_matrix(matrix):
+    # Interchange the rows
+    matrix[current_index], matrix[index] = matrix[index], matrix[current_index]
+    return True
+
+
+# def copy_pivot(matrix, index, results, vars):
+#     pivot_row = index
+#     pivot_col = index
+#     temp_matrix = []
+
+#     n = len(matrix)
+#     m = len(matrix[0]) - 1
+
+#     for row in range(n):
+#         # copiere linie pivot
+#         if row == pivot_row:
+#             temp_matrix.append(matrix[row])
+#         else:
+#             temp_matrix.append([])
+
+#     for row in range(n):
+#         for col in range(m):
+#             # coloana pivot inlocuit cu 0
+#             if row != pivot_row:
+#                 if col == pivot_col:
+#                     temp_matrix[row].append(0)
+#                 else:
+#                     # regula dreptunghiului
+#                     temp_matrix[row].append(1) # placeholder
+#                 if col == m - 1:
+#                     temp_matrix[row].append(results[row])
+
+#     matrix = temp_matrix
+
+#     print_matrix(matrix, vars)
+
+# NOU (16/03/2025) | FUNCTIE DE CALCULAT MATRICEA 
+def calculate_matrix(matrix, index, vars):
+    print(f"index-ul este: {index}")
+    n = len(matrix)
+    pivot = matrix[index][index]
+
+    if pivot == 0:
+        if not switch_rows(matrix, index):
+            if not switch_cols(matrix, index, vars):
+                print("Sistemul este incompatibil")
+                return  # oprim functia 
+
+    temp_matrix = [row[:] for row in matrix]  # copie matrice 
+
+    # schimbam cu 0 coloana pivotului
+    for j in range(n):
+        if j != index:
+            temp_matrix[j][index] = 0
+
+    # schimbam cu 0 linia pivotului
+    for i in range(n):
+        if i != index:
+            temp_matrix[index][i] = 0 
+
+    # formula triunghiului (explicatie mai jos)
+    for rows in range(len(matrix)):
+        for cols in range(len(matrix[rows])-1): 
+            if rows != index and cols != index:
+                temp_matrix[rows][cols] = matrix[rows][cols] * pivot - matrix[rows][index] * matrix[index][cols]
+
+    print("Matricea temporară după modificări:")
+    print_matrix(temp_matrix, vars)
+    return temp_matrix
+
     
-    for i,rows in enumerate(matrix):
-        pivot = matrix[i][i]
-        if pivot != 0:
-            # fa metoda lui gauss
-            pass
-        else:
-            possible = modify_rows(matrix,rows)
-            if not possible:
-                modify_cols(matrix,rows)
-                #testare if -> Daca e false , matrice incompatibila
-            
+
+    
+
+
+
+def gauss(matrix, vars, results):
+    n = len(matrix)
+
+    for index in range(n):
+        pivot = matrix[index][index]
+
+        if pivot == 0:
+            # Attempt to swap rows
+            if not switch_rows(matrix, index):
+                # Handle the case where swapping rows is not possible
+                if not switch_cols(matrix, index, vars):
+                    print("Sistemul este incompatibil")
+                    break
+
+            #print_matrix(matrix, vars)
+
+        #!! copy_pivot(matrix, index, results, vars)
+        calculate_matrix(matrix,index,vars)
+
     return matrix
-# NOU #
+
 
 def main():
     print("Introduceti ecuatiile sistemului: ")
-    #system = read_system()
-
-    # NOU #
+    # system = input_system()
     system = [
-        "0+2y+3z = 5",
-        "2x+4y+5z = 5",
-        "5x+3y+7z = 5"
-    
+        # "3z = 5",
+        # "2*x+0.1y -5z = 5",
+        # "5x-0y+7z = 5"
+
+        "x+y+2z=-1",
+        "2x-y+4z=-4",
+        "4x+y+4z=-2"
     ]
-    # NOU #
-    
     print("Ecuatiile introduse sunt:")
-    display_system(system)
+    print_system(system)
 
     # Parse the equations
     vars, pr_matrix, results = parse_equations(system)
@@ -141,17 +240,17 @@ def main():
     # Build the matrix
     num_equations = len(system)
     matrix = build_matrix(vars, pr_matrix, results, num_equations)
-    print(matrix)
-    #NOU#
-    print("//////")
-    print(f"{update_matrix(matrix)}\n")
-    print("//////")
-    #NOU#
 
     # Display the matrix
     print("Variabilele:", vars)
     print("Matricea:")
-    
+    for row in matrix:
+        print(row)
+
+    # modify_rows(matrix, 0)
+    print()
+    gauss(matrix, vars, results)
+
 
 main()
 
@@ -163,14 +262,18 @@ main()
 
 
 
-
-
-
-
-
-
-
+#Explicatii:
 #
-# git add .git commit -m "[text]" git push 
+# 0 1 2 3
 #
+# 0  4 #1 5 | 1
+# 2  3  0 6 | 1   =?     a[i_pivot][j_pivot]      *    a[i_target][j_target]
+# #2 0  3 0 | 1                                   -    
+# 9  9  0 9 | 1          #1 a[i_target][j_pivot]  *    #2 a[j_target][i_pivot]
+
+#           i  j
+# pivot = a[2][2]
+# target = a[0][0]
+# #1     = a[0][2]
+# #2     = a[2][0]
 #
