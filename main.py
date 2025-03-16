@@ -1,7 +1,7 @@
 import re
 
 
-def read_system():
+def input_system():
     system = []
     while True:
         equation = input()
@@ -13,10 +13,14 @@ def read_system():
     return system
 
 
-def display_system(system):
+def print_system(system):
     for i in range(0, len(system)):
         print(f"{{{system[i]}")
 
+def print_matrix(matrix, vars):
+    for row in matrix:
+        print(row)
+    print(vars, "\n")
 
 def parse_equations(inp):
     vars = []  # List to store all unique variables
@@ -27,8 +31,7 @@ def parse_equations(inp):
         # Remove all spaces and split into left and right parts
         formula = formula.replace(" ", "")
         parts = formula.split("=")
-        results.append(
-            int(parts[1]) if float(parts[1]).is_integer() else float(parts[1]))  # Store the constant term as a float
+        results.append(int(parts[1]) if float(parts[1]).is_integer() else float(parts[1]))  # Store the constant term as a float
 
         # Split the left-hand side into terms
         terms = re.findall(r'([+-]?\d*\.?\d*\*?[a-zA-Z]+\d*)', parts[0])
@@ -122,7 +125,39 @@ def switch_rows(matrix, current_index):
     return True
 
 
-def gauss(matrix,vars):
+def copy_pivot(matrix, index, results, vars):
+    pivot_row = index
+    pivot_col = index
+    temp_matrix = []
+
+    n = len(matrix)
+    m = len(matrix[0]) - 1
+
+    for row in range(n):
+        # copiere linie pivot
+        if row == pivot_row:
+            temp_matrix.append(matrix[row])
+        else:
+            temp_matrix.append([])
+
+    for row in range(n):
+        for col in range(m):
+            # coloana pivot inlocuit cu 0
+            if row != pivot_row:
+                if col == pivot_col:
+                    temp_matrix[row].append(0)
+                else:
+                    # regula dreptunghiului
+                    temp_matrix[row].append(1) # placeholder
+                if col == m - 1:
+                    temp_matrix[row].append(results[row])
+
+    matrix = temp_matrix
+
+    print_matrix(matrix, vars)
+
+
+def gauss(matrix, vars, results):
     n = len(matrix)
 
     for index in range(n):
@@ -133,30 +168,30 @@ def gauss(matrix,vars):
             if not switch_rows(matrix, index):
                 # Handle the case where swapping rows is not possible
                 if not switch_cols(matrix, index, vars):
-                    print("Sistemul este imcompatibil")
+                    print("Sistemul este incompatibil")
                     break
-            for row in matrix:
-                print(row)
-            print(vars, "\n")
-        else:
-            #copiere linie pivot
-            #coloana pivot inlocuit cu 0
-            #regula dreptunghiului
-            pass
+
+            print_matrix(matrix, vars)
+
+        copy_pivot(matrix, index, results, vars)
 
     return matrix
 
 
 def main():
     print("Introduceti ecuatiile sistemului: ")
-    # system = read_system()
+    # system = input_system()
     system = [
-        "3z = 5",
-        "2*x+0.1y -5z = 5",
-        "5x-0y+7z = 5"
+        # "3z = 5",
+        # "2*x+0.1y -5z = 5",
+        # "5x-0y+7z = 5"
+
+        "x+y+2z=-1",
+        "2x-y+4z=-4",
+        "4x+y+4z=-2"
     ]
     print("Ecuatiile introduse sunt:")
-    display_system(system)
+    print_system(system)
 
     # Parse the equations
     vars, pr_matrix, results = parse_equations(system)
@@ -173,7 +208,7 @@ def main():
 
     # modify_rows(matrix, 0)
     print()
-    gauss(matrix,vars)
+    gauss(matrix, vars, results)
 
 
 main()
