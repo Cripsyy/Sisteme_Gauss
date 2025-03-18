@@ -12,7 +12,6 @@ def input_system():
         print("Introduceti alta ecuatie sau Enter pentru a opri")
     return system
 
-
 def print_system(system):
     for i in range(0, len(system)):
         print(f"{{{system[i]}")
@@ -157,45 +156,38 @@ def switch_rows(matrix, current_index):
 
 #     print_matrix(matrix, vars)
 
+
+
+
 # NOU (16/03/2025) | FUNCTIE DE CALCULAT MATRICEA 
-def calculate_matrix(matrix, index, vars):
+def calculate_matrix(matrix, index, vars,results):
     print(f"index-ul este: {index}")
     n = len(matrix)
-    pivot = matrix[index][index]
 
-    if pivot == 0:
-        if not switch_rows(matrix, index):
-            if not switch_cols(matrix, index, vars):
-                print("Sistemul este incompatibil")
-                return  # oprim functia 
+    print(f"Matricea originala = {matrix}")
+    temp_matrix = [row[:] for row in matrix] 
+    print(f"matricea copiata: {temp_matrix}")
 
-    temp_matrix = [row[:] for row in matrix]  # copie matrice 
+    # imparte elementele la divizorul comun (unde e cazul). 
+    for i in range(len(temp_matrix)):
+        for j in range(1, 9): 
+            if all(x % j == 0 for x in temp_matrix[i]): 
+                temp_matrix[i] = [x // j for x in temp_matrix[i]]  
+                break 
 
+    for rows in range(len(matrix)):
+        for cols in range(len(matrix)): 
+            if rows != index and cols != index: 
+                temp_matrix[rows][cols] =temp_matrix[rows][cols] * temp_matrix[index][index] - temp_matrix[rows][index] * temp_matrix[index][cols]
     # schimbam cu 0 coloana pivotului
     for j in range(n):
         if j != index:
             temp_matrix[j][index] = 0
 
-    # schimbam cu 0 linia pivotului
-    for i in range(n):
-        if i != index:
-            temp_matrix[index][i] = 0 
-
-    # formula triunghiului (explicatie mai jos)
-    for rows in range(len(matrix)):
-        for cols in range(len(matrix[rows])-1): 
-            if rows != index and cols != index:
-                temp_matrix[rows][cols] = matrix[rows][cols] * pivot - matrix[rows][index] * matrix[index][cols]
 
     print("Matricea temporară după modificări:")
     print_matrix(temp_matrix, vars)
     return temp_matrix
-
-    
-
-    
-
-
 
 def gauss(matrix, vars, results):
     n = len(matrix)
@@ -214,10 +206,9 @@ def gauss(matrix, vars, results):
             #print_matrix(matrix, vars)
 
         #!! copy_pivot(matrix, index, results, vars)
-        calculate_matrix(matrix,index,vars)
+        matrix = calculate_matrix(matrix,index,vars,results) # NOU (16/03/2025)
 
     return matrix
-
 
 def main():
     print("Introduceti ecuatiile sistemului: ")
@@ -227,9 +218,17 @@ def main():
         # "2*x+0.1y -5z = 5",
         # "5x-0y+7z = 5"
 
-        "x+y+2z=-1",
-        "2x-y+4z=-4",
-        "4x+y+4z=-2"
+        # "x+y+2z=-1",
+        # "2x-y+4z=-4",
+        # "4x+y+4z=-2"
+
+        #testare cu un sistem incompatibil  # NOU (16/03/2025) | FUNCTIE DE CALCULAT MATRICEA 
+        # "3x-6y+12z=6",
+        # "-2x+5y-9z=-7",
+        # "-x +3y-5z=-4"
+        "2x-3y+4z=13",
+        "-x+2y-3z=-9",
+        "3x+y-2z=-2"
     ]
     print("Ecuatiile introduse sunt:")
     print_system(system)
@@ -277,3 +276,9 @@ main()
 # #1     = a[0][2]
 # #2     = a[2][0]
 #
+
+
+
+#To do
+# de schimbat si results
+# de verificat daca e determinata sau nedeterminata 
