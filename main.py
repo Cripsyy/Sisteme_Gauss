@@ -23,6 +23,7 @@ def print_matrix(matrix, vars):
     print(vars, "\n")
 
 def parse_equations(inp):
+
     vars = []  # List to store all unique variables
     pr_mtr = {}  # Dictionary to store coefficients
     results = []  # List to store the constant terms
@@ -71,8 +72,6 @@ def parse_equations(inp):
     vars.sort()
 
     return vars, pr_mtr, results
-
-
 def build_matrix(vars, pr_mtr, results, num_equations):
     # Initialize the matrix with zeros
     matrix = [[0 for _ in range(len(vars) + 1)] for _ in range(num_equations)]
@@ -85,7 +84,6 @@ def build_matrix(vars, pr_mtr, results, num_equations):
 
 
     return matrix
-
 
 def switch_cols(matrix, current_index, vars):
     n = len(matrix)
@@ -108,7 +106,6 @@ def switch_cols(matrix, current_index, vars):
 
     return matrix
 
-
 def switch_rows(matrix, current_index):
     n = len(matrix)
     index = current_index
@@ -125,47 +122,15 @@ def switch_rows(matrix, current_index):
     return True
 
 
-# def copy_pivot(matrix, index, results, vars):
-#     pivot_row = index
-#     pivot_col = index
-#     temp_matrix = []
-
-#     n = len(matrix)
-#     m = len(matrix[0]) - 1
-
-#     for row in range(n):
-#         # copiere linie pivot
-#         if row == pivot_row:
-#             temp_matrix.append(matrix[row])
-#         else:
-#             temp_matrix.append([])
-
-#     for row in range(n):
-#         for col in range(m):
-#             # coloana pivot inlocuit cu 0
-#             if row != pivot_row:
-#                 if col == pivot_col:
-#                     temp_matrix[row].append(0)
-#                 else:
-#                     # regula dreptunghiului
-#                     temp_matrix[row].append(1) # placeholder
-#                 if col == m - 1:
-#                     temp_matrix[row].append(results[row])
-
-#     matrix = temp_matrix
-
-#     print_matrix(matrix, vars)
-
-
-
 
 # NOU (16/03/2025) | FUNCTIE DE CALCULAT MATRICEA 
 def calculate_matrix(matrix, index, vars,results):
     print(f"index-ul este: {index}")
-    n = len(matrix)
-
+    
     print(f"Matricea originala = {matrix}")
     temp_matrix = [row[:] for row in matrix] 
+    temp_matrix.append(results)
+    n = len(temp_matrix)
     print(f"matricea copiata: {temp_matrix}")
 
     # imparte elementele la divizorul comun (unde e cazul). 
@@ -208,7 +173,7 @@ def gauss(matrix, vars, results):
         #!! copy_pivot(matrix, index, results, vars)
         matrix = calculate_matrix(matrix,index,vars,results) # NOU (16/03/2025)
 
-    return matrix
+    return matrix 
 
 def main():
     print("Introduceti ecuatiile sistemului: ")
@@ -282,3 +247,4 @@ main()
 #To do
 # de schimbat si results
 # de verificat daca e determinata sau nedeterminata 
+# 
