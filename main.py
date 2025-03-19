@@ -124,22 +124,12 @@ def switch_rows(matrix, current_index):
 
 
 # NOU (16/03/2025) | FUNCTIE DE CALCULAT MATRICEA 
-def calculate_matrix(matrix, index, vars,results):
+def calculate_matrix(matrix, index, vars):
     print(f"index-ul este: {index}")
-    
-    print(f"Matricea originala = {matrix}")
+
     temp_matrix = [row[:] for row in matrix]
     n = len(temp_matrix)
     m = len(temp_matrix[0])
-
-    print(f"matricea copiata: {temp_matrix}")
-
-    # imparte elementele la divizorul comun (unde e cazul). 
-    for i in range(n):
-        for j in range(1, 9): 
-            if all(x % j == 0 for x in temp_matrix[i]): 
-                temp_matrix[i] = [x // j for x in temp_matrix[i]]  
-                break 
 
     for rows in range(n):
         for cols in range(m):
@@ -155,19 +145,28 @@ def calculate_matrix(matrix, index, vars,results):
     print_matrix(temp_matrix, vars)
     return temp_matrix
 
-def calculate_variables(matrix, results):
+def calculate_variables(matrix, vars):
+    print("Sistemul este compatibil")
     n = len(matrix)
+    m = len(matrix[0]) - 1
     variables_values = []
-    for index in range(n):
-        if matrix[index][index] != 0:
-            variables_values.append(float(matrix[index][-1]) / matrix[index][index])
+    sec_vars = ["alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta"]
+    sec_index = 0
+
+    for row in range(n):
+        cnt = 0
+        for col in range(m):
+            if matrix[row][col] != 0:
+                cnt += 1
+        if cnt == 1:
+            variables_values.append(f"{vars[row]}:{float(matrix[row][-1]) / matrix[row][row]}")
         else:
-            print("caz de nedeterminare")
-            pass
+            variables_values.append(sec_vars[sec_index])
+            sec_index += 1
 
     return variables_values
 
-def gauss(matrix, vars, results):
+def gauss(matrix, vars):
     n = len(matrix)
 
     for index in range(n):
@@ -178,13 +177,15 @@ def gauss(matrix, vars, results):
             if not switch_rows(matrix, index):
                 # Handle the case where swapping rows is not possible
                 if not switch_cols(matrix, index, vars):
-                    print("Sistemul este incompatibil")
+                    if matrix[index][-1] != 0:
+                        print("Sistemul este incompatibil")
                     break
 
             #print_matrix(matrix, vars)
 
         #!! copy_pivot(matrix, index, results, vars)
-        matrix = calculate_matrix(matrix,index,vars,results) # NOU (16/03/2025)
+        matrix = calculate_matrix(matrix,index,vars) # NOU (16/03/2025)
+    print(calculate_variables(matrix, vars))
 
     return matrix 
 
@@ -200,9 +201,13 @@ def main():
         # "2x-y+4z=-4",
         # "4x+y+4z=-2"
 
-        "x+y+z=5",
-        "2x+3y+z=8",
-        "3x+4y+2z=13"
+        "-x3+4x4=2",
+        "x1-2x2+4x3+3x4=4",
+        "3x1-6x2+8x3+5x4=0"
+
+        # "x+y+z=5",
+        # "2x+3y+z=8",
+        # "3x+4y+2z=13"
 
         #testare cu un sistem incompatibil  # NOU (16/03/2025) | FUNCTIE DE CALCULAT MATRICEA 
         # "3x-6y+12z=6",
@@ -228,10 +233,9 @@ def main():
     for row in matrix:
         print(row)
 
-    # modify_rows(matrix, 0)
     print()
-    matrix = gauss(matrix, vars, results)
-    print(calculate_variables(matrix, results))
+    gauss(matrix, vars)
+
 
 
 
