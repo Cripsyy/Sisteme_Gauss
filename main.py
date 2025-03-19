@@ -72,6 +72,7 @@ def parse_equations(inp):
     vars.sort()
 
     return vars, pr_mtr, results
+
 def build_matrix(vars, pr_mtr, results, num_equations):
     # Initialize the matrix with zeros
     matrix = [[0 for _ in range(len(vars) + 1)] for _ in range(num_equations)]
@@ -81,7 +82,6 @@ def build_matrix(vars, pr_mtr, results, num_equations):
         for j, var in enumerate(vars):
             matrix[i][j] = pr_mtr.get((i, var), 0)
         matrix[i][-1] = results[i]
-
 
     return matrix
 
@@ -121,10 +121,7 @@ def switch_rows(matrix, current_index):
     matrix[current_index], matrix[index] = matrix[index], matrix[current_index]
     return True
 
-
-
-# NOU (16/03/2025) | FUNCTIE DE CALCULAT MATRICEA 
-def calculate_matrix(matrix, index, vars):
+def calculate_matrix(matrix, index):
     print(f"index-ul este: {index}")
 
     temp_matrix = [row[:] for row in matrix]
@@ -134,37 +131,54 @@ def calculate_matrix(matrix, index, vars):
     for rows in range(n):
         for cols in range(m):
             if rows != index and cols != index: 
-                temp_matrix[rows][cols] =temp_matrix[rows][cols] * temp_matrix[index][index] - temp_matrix[rows][index] * temp_matrix[index][cols]
+                temp_matrix[rows][cols] = temp_matrix[rows][cols] * temp_matrix[index][index] - temp_matrix[rows][index] * temp_matrix[index][cols]
+
     # schimbam cu 0 coloana pivotului
     for j in range(n):
         if j != index:
             temp_matrix[j][index] = 0
 
-
-    print("Matricea temporară după modificări:")
-    print_matrix(temp_matrix, vars)
     return temp_matrix
+
 
 def calculate_variables(matrix, vars):
     print("Sistemul este compatibil")
     n = len(matrix)
     m = len(matrix[0]) - 1
-    variables_values = []
+    variables_dict = {}  # Dictionary to store variables and their values
     sec_vars = ["alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta"]
     sec_index = 0
 
     for row in range(n):
         cnt = 0
-        for col in range(m):
+        main_var = None
+        solution = str(matrix[row][-1])  # Start as a string to handle symbolic substitution
+
+        for col in range(row, m):
             if matrix[row][col] != 0:
                 cnt += 1
-        if cnt == 1:
-            variables_values.append(f"{vars[row]}:{float(matrix[row][-1]) / matrix[row][row]}")
-        else:
-            variables_values.append(sec_vars[sec_index])
-            sec_index += 1
+                if cnt == 1:
+                    main_var = vars[col]  # The first variable in the equation is the main one
+                else:
+                    if vars[col] not in variables_dict:
+                        # Assign a secondary variable name if not already assigned
+                        variables_dict[vars[col]] = sec_vars[sec_index]
+                        sec_index += 1
 
-    return variables_values
+                    # Append the secondary variable term as a string
+                    if matrix[row][col] < 0:
+                        solution += f" + {-1 * matrix[row][col]}*{variables_dict[vars[col]]}"
+                    else:
+                        solution += f" - {-1 * matrix[row][col]}*{variables_dict[vars[col]]}"
+        if cnt == 1:
+            # If only one variable in the equation, solve directly as a number
+            variables_dict[main_var] = str(float(matrix[row][-1]) / matrix[row][row])
+        elif cnt > 1:
+            # More than one variable -> express main variable in terms of secondary ones
+            variables_dict[main_var] = f"({solution}) / {matrix[row][row]}"
+
+    return variables_dict  # Return the computed variables
+
 
 def gauss(matrix, vars):
     n = len(matrix)
@@ -181,10 +195,10 @@ def gauss(matrix, vars):
                         print("Sistemul este incompatibil")
                     break
 
-            #print_matrix(matrix, vars)
+        print_matrix(matrix, vars)
 
-        #!! copy_pivot(matrix, index, results, vars)
-        matrix = calculate_matrix(matrix,index,vars) # NOU (16/03/2025)
+        matrix = calculate_matrix(matrix,index)
+        print_matrix(matrix, vars)
     print(calculate_variables(matrix, vars))
 
     return matrix 
@@ -205,17 +219,9 @@ def main():
         "x1-2x2+4x3+3x4=4",
         "3x1-6x2+8x3+5x4=0"
 
-        # "x+y+z=5",
-        # "2x+3y+z=8",
-        # "3x+4y+2z=13"
-
-        #testare cu un sistem incompatibil  # NOU (16/03/2025) | FUNCTIE DE CALCULAT MATRICEA 
-        # "3x-6y+12z=6",
-        # "-2x+5y-9z=-7",
-        # "-x +3y-5z=-4"
-        # "2x-3y+4z=13",
-        # "-x+2y-3z=-9",
-        # "3x+y-2z=-2"''
+        # "2x+3y−z+u=5",
+        # "4x−y+2z−v=8",
+        # "−x+5y+3z+u+v=2"
     ]
     print("Ecuatiile introduse sunt:")
     print_system(system)
@@ -229,45 +235,10 @@ def main():
 
     # Display the matrix
     print("Variabilele:", vars)
-    print("Matricea:")
-    for row in matrix:
-        print(row)
+    print("Matricea sistemului:")
+    print_matrix(matrix, vars)
 
     print()
     gauss(matrix, vars)
 
-
-
-
 main()
-
-
-
-
-
-
-
-
-
-#Explicatii:
-#
-# 0 1 2 3
-#
-# 0  4 #1 5 | 1
-# 2  3  0 6 | 1   =?     a[i_pivot][j_pivot]      *    a[i_target][j_target]
-# #2 0  3 0 | 1                                   -    
-# 9  9  0 9 | 1          #1 a[i_target][j_pivot]  *    #2 a[j_target][i_pivot]
-
-#           i  j
-# pivot = a[2][2]
-# target = a[0][0]
-# #1     = a[0][2]
-# #2     = a[2][0]
-#
-
-
-
-#To do
-# de schimbat si results
-# de verificat daca e determinata sau nedeterminata 
-# 
