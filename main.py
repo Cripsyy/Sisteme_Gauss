@@ -1,5 +1,6 @@
 import re
-
+import math
+from functools import reduce
 
 def input_system():
     system = []
@@ -17,7 +18,6 @@ def print_system(system):
         print(f"{{{system[i]}")
 
 def print_matrix(matrix, vars):
-    print("----------------------------")
     for row in matrix:
         print(row)
     print(vars, "\n")
@@ -30,12 +30,12 @@ def parse_equations(inp):
 
     for i, formula in enumerate(inp):
         # Remove all spaces and split into left and right parts
-        formula = formula.replace(" ", "")
+        formula = formula.replace(" ", "").replace("−","-") # replace − with - because yes
         parts = formula.split("=")
         results.append(int(parts[1]) if float(parts[1]).is_integer() else float(parts[1]))  # Store the constant term as a float
 
         # Split the left-hand side into terms
-        terms = re.findall(r'([+-]?\d*\.?\d*\*?[a-zA-Z]+\d*)', parts[0])
+        terms = re.findall(r'([+-]?[0-9]*\.?[0-9]*\*?[a-zA-Z]+\d*)', parts[0])
 
         for term in terms:
             # Handle the sign
@@ -128,31 +128,34 @@ def calculate_matrix(matrix, index):
     n = len(temp_matrix)
     m = len(temp_matrix[0])
 
+    # Every value in the matrix that is not on the pivot row or column is calculated with the rectangle method
     for rows in range(n):
         for cols in range(m):
             if rows != index and cols != index: 
                 temp_matrix[rows][cols] = temp_matrix[rows][cols] * temp_matrix[index][index] - temp_matrix[rows][index] * temp_matrix[index][cols]
 
-    # schimbam cu 0 coloana pivotului
+    # Pivot column is replaced with zeros
     for j in range(n):
         if j != index:
             temp_matrix[j][index] = 0
 
     return temp_matrix
 
-
 def calculate_variables(matrix, vars):
-    print("Sistemul este compatibil")
+    row_simplification(matrix)
+    print_matrix(matrix, vars)
+
     n = len(matrix)
     m = len(matrix[0]) - 1
     variables_dict = {}  # Dictionary to store variables and their values
-    sec_vars = ["alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta"]
+    sec_vars = ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ"]
     sec_index = 0
 
     for row in range(n):
         cnt = 0
         main_var = None
         solution = str(matrix[row][-1])  # Start as a string to handle symbolic substitution
+
 
         for col in range(row, m):
             if matrix[row][col] != 0:
@@ -167,17 +170,42 @@ def calculate_variables(matrix, vars):
 
                     # Append the secondary variable term as a string
                     if matrix[row][col] < 0:
-                        solution += f" + {-1 * matrix[row][col]}*{variables_dict[vars[col]]}"
+                        solution += f" + {-1 * matrix[row][col]}{variables_dict[vars[col]]}"
                     else:
-                        solution += f" - {-1 * matrix[row][col]}*{variables_dict[vars[col]]}"
+                        solution += f" {-1 * matrix[row][col]}{variables_dict[vars[col]]}"
         if cnt == 1:
             # If only one variable in the equation, solve directly as a number
             variables_dict[main_var] = str(float(matrix[row][-1]) / matrix[row][row])
-        elif cnt > 1:
+        elif cnt > 1 and matrix[row][row] == -1:
+            variables_dict[main_var] = f"-({solution})"
+        elif cnt > 1 and matrix[row][row] == 1:
+            variables_dict[main_var] = f"{solution}"
+        elif cnt > 1 and matrix[row][row] != 1:
             # More than one variable -> express main variable in terms of secondary ones
             variables_dict[main_var] = f"({solution}) / {matrix[row][row]}"
 
+    # Sort the variables in the lexicographic order
+    keys = list(variables_dict.keys())
+    keys.sort()
+    variables_dict = {i: variables_dict[i] for i in keys}
+
+    if sec_index == 1:
+        print("Sistemul este compatibil simplu nedeterminat")
+    elif sec_index == 0:
+        print("Sistemul este compatibil determinat")
+    else:
+        print(f"Sistem este compatibil nedeterminat de {sec_index}")
+
+
     return variables_dict  # Return the computed variables
+
+
+def row_simplification(matrix):
+    for row in matrix:
+        row_gcd = reduce(math.gcd, row)
+        for i in range(len(row)):
+            row[i] = row[i] // row_gcd
+    return matrix
 
 
 def gauss(matrix, vars):
@@ -199,7 +227,9 @@ def gauss(matrix, vars):
 
         matrix = calculate_matrix(matrix,index)
         print_matrix(matrix, vars)
-    print(calculate_variables(matrix, vars))
+
+    solution  = calculate_variables(matrix, vars)
+    print(f"Solutia sistemului este: {solution}")
 
     return matrix 
 
@@ -218,6 +248,10 @@ def main():
         "-x3+4x4=2",
         "x1-2x2+4x3+3x4=4",
         "3x1-6x2+8x3+5x4=0"
+
+        # "x+2y−z=4",
+        # "3x−y+2z=1",
+        # "2x+y+z=5"
 
         # "2x+3y−z+u=5",
         # "4x−y+2z−v=8",
