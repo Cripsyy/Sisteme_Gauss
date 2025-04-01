@@ -148,7 +148,10 @@ def calculate_variables(matrix, vars):
     n = len(matrix)
     m = len(matrix[0]) - 1
     variables_dict = {}  # Dictionary to store variables and their values
-    sec_vars = ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ"]
+    GREEK_LETTERS = ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ"]
+    TYPES = ["simplu", "dublu", "triplu", "cvadruplu", "cvintuplu", "sextuplu", "septuplu", "octuplu", "nonutuplu", "decuplu"]
+    main_vars = []
+    sec_vars = []
     sec_index = 0
 
     for row in range(n):
@@ -156,16 +159,18 @@ def calculate_variables(matrix, vars):
         main_var = None
         solution = str(matrix[row][-1])  # Start as a string to handle symbolic substitution
 
-
         for col in range(row, m):
             if matrix[row][col] != 0:
                 cnt += 1
                 if cnt == 1:
                     main_var = vars[col]  # The first variable in the equation is the main one
+                    if main_var not in main_vars:
+                        main_vars.append(main_var)
                 else:
                     if vars[col] not in variables_dict:
                         # Assign a secondary variable name if not already assigned
-                        variables_dict[vars[col]] = sec_vars[sec_index]
+                        variables_dict[vars[col]] = GREEK_LETTERS[sec_index]
+                        sec_vars.append(vars[col])
                         sec_index += 1
 
                     # Append the secondary variable term as a string
@@ -175,7 +180,7 @@ def calculate_variables(matrix, vars):
                         solution += f" {-1 * matrix[row][col]}{variables_dict[vars[col]]}"
         if cnt == 1:
             # If only one variable in the equation, solve directly as a number
-            variables_dict[main_var] = str(float(matrix[row][-1]) / matrix[row][row])
+            variables_dict[main_var] = f"{(matrix[row][-1])} / {matrix[row][row]}"
         elif cnt > 1 and matrix[row][row] == -1:
             variables_dict[main_var] = f"-({solution})"
         elif cnt > 1 and matrix[row][row] == 1:
@@ -189,13 +194,14 @@ def calculate_variables(matrix, vars):
     keys.sort()
     variables_dict = {i: variables_dict[i] for i in keys}
 
-    if sec_index == 1:
-        print("Sistemul este compatibil simplu nedeterminat")
-    elif sec_index == 0:
+    if sec_index == 0:
         print("Sistemul este compatibil determinat")
     else:
-        print(f"Sistem este compatibil nedeterminat de {sec_index}")
+        print(f"Sistemul este compatibil {TYPES[sec_index - 1]} nedeterminat")
 
+    print(f"Variabilele principale: {", ".join(main_vars)}")
+    if sec_index != 0:
+        print(f"Variabilele secundare: {", ".join(sec_vars)}")
 
     return variables_dict  # Return the computed variables
 
@@ -238,24 +244,29 @@ def main():
     # system = input_system()
     system = [
         # "3z = 5",
-        # "2*x+0.1y -5z = 5",
+        # "2*x+2y -5z = 5",
         # "5x-0y+7z = 5"
 
         # "x+y+2z=-1",
         # "2x-y+4z=-4",
         # "4x+y+4z=-2"
 
-        "-x3+4x4=2",
-        "x1-2x2+4x3+3x4=4",
-        "3x1-6x2+8x3+5x4=0"
+        # "-x3+4x4=2",
+        # "x1-2x2+4x3+3x4=4",
+        # "3x1-6x2+8x3+5x4=0"
 
-        # "x+2y−z=4",
-        # "3x−y+2z=1",
-        # "2x+y+z=5"
+        "x+2y−z=4",
+        "3x−y+2z=1",
+        "2x+y+z=5"
 
         # "2x+3y−z+u=5",
         # "4x−y+2z−v=8",
         # "−x+5y+3z+u+v=2"
+
+        # "x1+x2+3x3=0",
+        # "x1-x2+x3=6",
+        # "2x1+x2+x3-3x4=1",
+        # "2x2-x3+x4=3"
     ]
     print("Ecuatiile introduse sunt:")
     print_system(system)
