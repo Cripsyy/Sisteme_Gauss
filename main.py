@@ -157,15 +157,14 @@ def calculate_variables(matrix, vars):
     for row in range(n):
         cnt = 0
         main_var = None
-        solution = str(matrix[row][-1])  # Start as a string to handle symbolic substitution
+        solution = f"({str(matrix[row][-1])}"  # Start as a string to handle symbolic substitution
 
         for col in range(row, m):
             if matrix[row][col] != 0:
                 cnt += 1
                 if cnt == 1:
                     main_var = vars[col]  # The first variable in the equation is the main one
-                    if main_var not in main_vars:
-                        main_vars.append(main_var)
+                    main_vars.append(main_var)
                 else:
                     if vars[col] not in variables_dict:
                         # Assign a secondary variable name if not already assigned
@@ -174,20 +173,11 @@ def calculate_variables(matrix, vars):
                         sec_index += 1
 
                     # Append the secondary variable term as a string
-                    if matrix[row][col] < 0:
-                        solution += f" + {-1 * matrix[row][col]}{variables_dict[vars[col]]}"
-                    else:
-                        solution += f" {-1 * matrix[row][col]}{variables_dict[vars[col]]}"
-        if cnt == 1:
-            # If only one variable in the equation, solve directly as a number
-            variables_dict[main_var] = f"{(matrix[row][-1])} / {matrix[row][row]}"
-        elif cnt > 1 and matrix[row][row] == -1:
-            variables_dict[main_var] = f"-({solution})"
-        elif cnt > 1 and matrix[row][row] == 1:
-            variables_dict[main_var] = f"{solution}"
-        elif cnt > 1 and matrix[row][row] != 1:
-            # More than one variable -> express main variable in terms of secondary ones
-            variables_dict[main_var] = f"({solution}) / {matrix[row][row]}"
+                    solution += f" +{-1 * matrix[row][col]}{variables_dict[vars[col]]}"
+
+        # Append the main variables
+        solution += f") / {matrix[row][row]}"
+        variables_dict[main_var] = simplify(solution)
 
     # Sort the variables in the lexicographic order
     keys = list(variables_dict.keys())
@@ -208,11 +198,41 @@ def calculate_variables(matrix, vars):
 
 def row_simplification(matrix):
     for row in matrix:
-        row_gcd = reduce(math.gcd, row)
-        for i in range(len(row)):
-            row[i] = row[i] // row_gcd
+        if (all(value.is_integer()) and (value != 0 or value != 1) for value in row):
+            row_gcd = reduce(math.gcd, map(int, row))
+            for i in range(len(row)):
+                row[i] = int(row[i]) // row_gcd
     return matrix
 
+def simplify(solution):
+    negative = False
+
+    left, right = solution.split(" / ")
+    if right[0] == "-":
+        negative = True
+        right = right[1:]
+
+    left = left.strip("()")
+    parts = left.split(" ")
+    left = ""
+    for part in parts:
+        if negative:
+            part = "-" + part
+        sign = 1
+        for char in part:
+            if char not in "+-":
+                break
+            if char == "-":
+                sign *= -1
+        part = part.strip("+-")
+        left += (" + " if sign == 1 else " - ") + part
+    left = left.strip("+ ")
+    if right == "1":
+        return left
+    elif len(parts) == 1:
+        return f"{left} / {right}"
+    else:
+        return f"({left}) / {right}"
 
 def gauss(matrix, vars):
     n = len(matrix)
@@ -234,7 +254,7 @@ def gauss(matrix, vars):
         matrix = calculate_matrix(matrix,index)
         print_matrix(matrix, vars)
 
-    solution  = calculate_variables(matrix, vars)
+    solution = calculate_variables(matrix, vars)
     print(f"Solutia sistemului este: {solution}")
 
     return matrix 
@@ -245,7 +265,7 @@ def main():
     system = [
         # "3z = 5",
         # "2*x+2y -5z = 5",
-        # "5x-0y+7z = 5"
+        # "5x-0.5y+7z = 5"
 
         # "x+y+2z=-1",
         # "2x-y+4z=-4",
@@ -255,18 +275,25 @@ def main():
         # "x1-2x2+4x3+3x4=4",
         # "3x1-6x2+8x3+5x4=0"
 
-        "x+2y−z=4",
-        "3x−y+2z=1",
-        "2x+y+z=5"
+        # "-x1 + 2x4 = 7",
+        # "-x2 = -2",
+        # "x3= 1"
 
-        # "2x+3y−z+u=5",
-        # "4x−y+2z−v=8",
-        # "−x+5y+3z+u+v=2"
+        # "x+2y−z=4",
+        # "3x−y+2z=1",
+        # "2x+y+z=5"
+
+        "2x+3y−z+u=5",
+        "4x−y+2z−v=8",
+        "−x+5y+3z+u+v=2"
 
         # "x1+x2+3x3=0",
         # "x1-x2+x3=6",
         # "2x1+x2+x3-3x4=1",
         # "2x2-x3+x4=3"
+
+        # "6x + 3y=11.6",
+        # "14x+8y=4.2"
     ]
     print("Ecuatiile introduse sunt:")
     print_system(system)
