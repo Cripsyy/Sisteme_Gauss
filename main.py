@@ -28,6 +28,8 @@ def parse_equations(inp):
     pr_mtr = {}  # Dictionary to store coefficients
     results = []  # List to store the constant terms
 
+    seen_vars = set()
+
     for i, formula in enumerate(inp):
         # Remove all spaces and split into left and right parts
         formula = formula.replace(" ", "").replace("−","-") # replace − with - because yes
@@ -36,6 +38,8 @@ def parse_equations(inp):
 
         # Split the left-hand side into terms
         terms = re.findall(r'([+-]?[0-9]*\.?[0-9]*\*?[a-zA-Z]+\d*)', parts[0])
+
+        equation_vars = []
 
         for term in terms:
             # Handle the sign
@@ -61,15 +65,18 @@ def parse_equations(inp):
             else:
                 coef = float(sign + coef_part)
 
-            if coef != 0:
+            if coef != 0 and var not in equation_vars:
                 # Add variable to the list if not already present
-                if var not in vars:
-                    vars.append(var)
+                equation_vars.append(var)
 
-                # Store the coefficient in the dictionary
+                    # Store coefficient
                 pr_mtr[(i, var)] = coef
 
-    vars.sort()
+                # Maintain global variable order based on the first time each variable appears
+                for var in equation_vars:
+                    if var not in seen_vars:
+                        vars.append(var)
+                        seen_vars.add(var)
 
     return vars, pr_mtr, results
 
@@ -93,11 +100,11 @@ def switch_cols(matrix, current_index, vars):
     # Check if the current row is the last row
     while matrix[row][index] == 0:
         if index + 1 >= m:
-            return False # Cannot swap, no collum to the right
-        # Swap the current collum with the collum to the right
+            return False # Cannot swap, no colum to the right
+        # Swap the current colum with the colum to the right
         index += 1
 
-    # Interchange the collums
+    # Interchange the colums
     for row in range(n):
         matrix[row][current_index], matrix[row][index] = matrix[row][index], matrix[row][current_index]
 
@@ -122,8 +129,6 @@ def switch_rows(matrix, current_index):
     return True
 
 def calculate_matrix(matrix, index):
-    print(f"index-ul este: {index}")
-
     temp_matrix = [row[:] for row in matrix]
     n = len(temp_matrix)
     m = len(temp_matrix[0])
@@ -142,9 +147,7 @@ def calculate_matrix(matrix, index):
     return temp_matrix
 
 def calculate_variables(matrix, vars):
-    row_simplification(matrix)
-    print_matrix(matrix, vars)
-
+    row_simplification(matrix,vars)
     n = len(matrix)
     m = len(matrix[0]) - 1
     variables_dict = {}  # Dictionary to store variables and their values
@@ -196,12 +199,15 @@ def calculate_variables(matrix, vars):
     return variables_dict  # Return the computed variables
 
 
-def row_simplification(matrix):
+def row_simplification(matrix,vars):
     for row in matrix:
         if (all(value.is_integer()) and (value != 0 or value != 1) for value in row):
             row_gcd = reduce(math.gcd, map(int, row))
             for i in range(len(row)):
                 row[i] = int(row[i]) // row_gcd
+
+    print_matrix(matrix,vars)
+
     return matrix
 
 def simplify(solution):
@@ -236,6 +242,7 @@ def simplify(solution):
 
 def gauss(matrix, vars):
     n = len(matrix)
+    print("Calculele cu metoda Gauss:")
 
     for index in range(n):
         pivot = matrix[index][index]
@@ -249,8 +256,6 @@ def gauss(matrix, vars):
                         print("Sistemul este incompatibil")
                     break
 
-        print_matrix(matrix, vars)
-
         matrix = calculate_matrix(matrix,index)
         print_matrix(matrix, vars)
 
@@ -261,40 +266,40 @@ def gauss(matrix, vars):
 
 def main():
     print("Introduceti ecuatiile sistemului: ")
-    # system = input_system()
-    system = [
-        # "3z = 5",
-        # "2*x+2y -5z = 5",
-        # "5x-0.5y+7z = 5"
-
-        # "x+y+2z=-1",
-        # "2x-y+4z=-4",
-        # "4x+y+4z=-2"
-
-        # "-x3+4x4=2",
-        # "x1-2x2+4x3+3x4=4",
-        # "3x1-6x2+8x3+5x4=0"
-
-        # "-x1 + 2x4 = 7",
-        # "-x2 = -2",
-        # "x3= 1"
-
-        # "x+2y−z=4",
-        # "3x−y+2z=1",
-        # "2x+y+z=5"
-
-        "2x+3y−z+u=5",
-        "4x−y+2z−v=8",
-        "−x+5y+3z+u+v=2"
-
-        # "x1+x2+3x3=0",
-        # "x1-x2+x3=6",
-        # "2x1+x2+x3-3x4=1",
-        # "2x2-x3+x4=3"
-
-        # "6x + 3y=11.6",
-        # "14x+8y=4.2"
-    ]
+    system = input_system()
+    # system = [
+    #     # "3z = 5",
+    #     # "2*x+2y -5z = 5",
+    #     # "5x-0.5y+7z = 5"
+    #
+    #     # "x+y+2z=-1",
+    #     # "2x-y+4z=-4",
+    #     # "4x+y+4z=-2"
+    #
+    #     # "-x3+4x4=2",
+    #     # "x1-2x2+4x3+3x4=4",
+    #     # "3x1-6x2+8x3+5x4=0"
+    #
+    #     # "-x1 + 2x4 = 7",
+    #     # "-x2 = -2",
+    #     # "x3= 1"
+    #
+    #     # "x+2y−z=4",
+    #     # "3x−y+2z=1",
+    #     # "2x+y+z=5"
+    #
+    #     "2x+3y−z+u=5",
+    #     "4x−y+2z−v=8",
+    #     "−x+5y+3z+u+v=2"
+    #
+    #     # "x1+x2+3x3=0",
+    #     # "x1-x2+x3=6",
+    #     # "2x1+x2+x3-3x4=1",
+    #     # "2x2-x3+x4=3"
+    #
+    #     # "6x + 3y=11.6",
+    #     # "14x+8y=4.2"
+    # ]
     print("Ecuatiile introduse sunt:")
     print_system(system)
 
@@ -308,7 +313,6 @@ def main():
     # Display the matrix
     print("Variabilele:", vars)
     print("Matricea sistemului:")
-    print_matrix(matrix, vars)
 
     print()
     gauss(matrix, vars)
