@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}
+Metoda lui GAUSS | CREARE MATRiCE
+{% endblock %}
+
+{% block content %}
+{% set placeholdere = ['x', 'y', 'z', 'a', 'b', 'c', 'd', 'e', 'f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','w'] %}
+<div class="go-home">
+    <button class="returnhome"><a href = "{{url_for('home')}}">◄ Inapoi</a></button>
+</div>
+<form method="POST" action="{{ url_for('rezultat') }}">
+    <div class="creatematrixv1">
+        {%for i in range(linia)%}
+            <label for="linia" class="input-label2">Introduceti sistemul</label>
+            <input type="text" name="matriceaIntrodusa_{{ i }}" class="matrixAv2-input" placeholder="Introduceti aici ecuatia...">
+        {%endfor%}
+        <div class="generarebtn">
+            <button type="submit" class="confirmbtn">Genereaza ►</button>
+        </div>
+    </div>
+   
+
+
+    </form>
+
+
+{% endblock %}
+
+{% block information %}
+
+{% endblock %}

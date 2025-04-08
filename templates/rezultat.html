@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}
+Metoda lui GAUSS | REZULTAT 
+{% endblock %}
+{% block content %}
+<div class="rezultat-container">
+    <div class="go-home2">
+        <button class="returnhome"><a href = "{{url_for('home')}}">◄ Acasa</a></button>
+    </div>
+    <div class="rezultat-top">
+        <h1 class="rezultat-title">Parcurgerea metodei lui Gauss</h1>
+    </div>
+    {% for matrix in matrices %}
+    <div class="matrix-step">
+        <h3 class = "steps">Pasul {{ loop.index }}:</h3>
+        <div class="matrix">
+            {% for row in matrix %}
+            <div class="matrix-row">
+                {% for val in row[:-1] %}
+                    <input type="text" class="matrix-cell" value="{{ val }}" readonly>
+                {% endfor %}
+                <span class="equal-sign">=</span>
+                <input type="text" class="matrix-cell b-value" value="{{ row[-1] }}" readonly>
+
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    <div id="sidebar" class="sidebar show">
+        <h2>Informatii sistem</h2>
+        <p><strong>Tip sistem:</strong> {{ matrix_type }}</p>
+    
+        {% if var_pos %}
+            <h3 class="varprc">Variabile principale:</h3>
+            <div class="var-container">
+                {% for vars in var_pos %}
+                <input type="text" class="var-cell" value="{{ vars }}">
+                {% endfor %}
+            </div>
+        {% endif %}
+    
+        {% if var_neg %}
+            <h3 class="varsec">Variabile secundare:</h3>
+            <div class="var-container">
+                {% for vars in var_neg %}
+                <input type="text" class="var-cell" value="{{ vars }}">
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <h2>Soluțiile variabilelor</h2>
+        <div class="solutions-container">
+            {% for var, frac in var_sol.items() %}
+                <div class="block-fractie">
+                    <div class="nume-var">{{ var }} =</div>
+                    {% if frac.numarator is defined and frac.numitor is defined %}
+                        <div class="fractie">
+                            <div class="numarator">{{ frac.numarator }}</div>
+                            <div class="numitor">{{ frac.numitor }}</div>
+                        </div>
+                    {% else %}
+                        <span>{{ frac }}</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        
+    
+</div>
+
+{% endblock %}
+{% block information %}
+{% endblock %}
