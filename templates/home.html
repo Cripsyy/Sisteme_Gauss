@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}
+Metoda lui GAUSS 
+{% endblock %}
+{% block content %}
+<div class="homematrix">
+    <div class="titlu">
+        <img src="{{url_for('static',filename='imagini/logogauss.png')}}">
+    </div>
+
+    <form method="POST" action="{{ url_for('crearematrice') }}">
+        <div class="inputs-container">
+            <label for="linia" class="input-label">Introduceti numarul de ecuatii:</label>
+            <div class="inputs">
+                <input type="number" class="input-boxhome" name="linia" placeholder="Introduceti numarul..." required>
+
+            </div>
+        </div>
+        <div class="confirmationbtn">
+            <button type="submit" class="confirmbtn">Confirmare</button>
+        </div>
+    </form>
+
+</div>
+{% endblock %}
+
+{% block information %}
+
+{% endblock %}
