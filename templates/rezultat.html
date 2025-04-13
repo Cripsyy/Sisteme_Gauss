@@ -12,43 +12,50 @@ Metoda lui GAUSS | REZULTAT
     </div>
     <div class="original-matrix">
         <h2 class="initial-title">Matricea inițială</h2>
-        <div class="matrix">
-            {% for row in matrix %}
-            <div class="matrix-row">
-                {% for val in row[:-1] %}
-                    <input type="text" class="matrix-cell" value="{{ val }}" disabled>
-                {% endfor %}
-                <span class="equal-sign">=</span>
-                <input type="text" class="matrix-cell b-value" value="{{ row[-1] }}" disabled>
+        <div class="matrix-container">
+            <div class="matrix">
+                <div class="matrix-row">
+                    {% for var in vars_list[0] %}
+                        <input type="text" class="matrix-cell" value="{{ var }}" disabled>
+                    {% endfor %}
+                </div>
             </div>
-            {% endfor %}
-            <div class="matrix-row">
-                {% for var in vars_list[0] %}
-                    <input type="text" class="matrix-cell" value="{{ var }}" disabled>
+            <div class="matrix">
+                {% for row in matrix %}
+                <div class="matrix-row">
+                    {% for val in row[:-1] %}
+                        <input type="text" class="matrix-cell" value="{{ val }}" disabled>
+                    {% endfor %}
+                    <span class="equal-sign">=</span>
+                    <input type="text" class="matrix-cell b-value" value="{{ row[-1] }}" disabled>
+                </div>
                 {% endfor %}
             </div>
         </div>
+
     </div>
 
-    <!-- Display each Gauss step -->
     {% for step_index in range(matrices|length) %}
     <div class="matrix-step">
-        <h3 class="steps">Pasul {{ step_index + 1 }}:</h3>
-        <div class="matrix">
-            {% for row in matrices[step_index] %}
-            <div class="matrix-row">
-                {% for val in row[:-1] %}
-                    <input type="text" class="matrix-cell" value="{{ val }}" disabled>
-                {% endfor %}
-                <span class="equal-sign">=</span>
-                <input type="text" class="matrix-cell b-value" value="{{ row[-1] }}" disabled>
+        <h3 class="steps">Pasul {{ step_index + 1 }}: {{ steps[step_index] }}</h3>
+        <div class="matrix-container">
+            <div class="matrix">
+                <div class="matrix-row">
+                    {% set current_vars = vars_list[step_index + 1] if vars_list|length > step_index + 1 else vars_list[-1] %}
+                    {% for var in current_vars %}
+                        <input type="text" class="matrix-cell" value="{{ var }}" disabled>
+                    {% endfor %}
+                </div>
             </div>
-            {% endfor %}
-            <!-- Display the corresponding variable order for this step -->
-            <div class="matrix-row">
-                {% set current_vars = vars_list[step_index + 1] if vars_list|length > step_index + 1 else vars_list[-1] %}
-                {% for var in current_vars %}
-                    <input type="text" class="matrix-cell" value="{{ var }}" disabled>
+            <div class="matrix">
+                {% for row in matrices[step_index] %}
+                <div class="matrix-row">
+                    {% for val in row[:-1] %}
+                        <input type="text" class="matrix-cell" value="{{ val }}" disabled>
+                    {% endfor %}
+                    <span class="equal-sign">=</span>
+                    <input type="text" class="matrix-cell b-value" value="{{ row[-1] }}" disabled>
+                </div>
                 {% endfor %}
             </div>
         </div>

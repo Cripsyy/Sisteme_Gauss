@@ -110,10 +110,6 @@ body{
     transition: color 0.3s ease; 
 }
 
-.confirmationbtn .confirmbtn :hover {
-    color: #388E3C;  
-}
-
 .creatematrix{
     display: flex;
     z-index: 1;
@@ -279,11 +275,7 @@ body{
     font-size: 20px;
     text-align: center;
     transition: transform 0.3s ease;
-    
 }
-.rezultat-box:hover {
-    transform: scale(1.05);
-  }
 
 .rezultat-title {
     font-size: 4em;
@@ -291,6 +283,10 @@ body{
     margin-bottom: 30px;
     color: #ffffff;
     text-shadow: 1px 1px 10px rgba(0,0,0,0.3);
+}
+
+.matrix-container {
+    align-items: flex-start;
 }
 
 .matrix {
@@ -301,13 +297,15 @@ body{
     border-radius: 8px;
     border: 2px solid white;
 }
-.matrix:hover{
-    transform: scale(1.03);
-    background-color: #1f2a38;
-}
+
 .matrix-row {
     display: flex;
     justify-content: left;
+}
+
+.matrix-container {
+    display: flex;
+    flex-direction: column;
 }
 
 .matrix-cell {
@@ -440,10 +438,7 @@ body{
     padding:10px;
     margin:0 auto;
 }
-.var-container:hover{
-    transform: scale(1.03);
-    background-color: #26373d;
-}
+
 .var-cell {
     padding: 8px;
     border:none;
@@ -456,10 +451,7 @@ body{
     font-family: "Patrick Hand", cursive;
     font-style: normal;
 }
-.var-cell:hover{
-    transform: scale(1.1);
-    background-color: #2e3b4e;
-}
+
 .solutions-container{
     display: flex;
     flex-direction: column;
@@ -482,10 +474,6 @@ body{
     transition: transform 0.2s ease;
 }
 
-.block-fractie:hover {
-    transform: scale(1.03);
-    background-color: #26373d;
-}
 
 .nume-var {
     margin-right: 15px;

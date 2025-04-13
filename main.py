@@ -18,6 +18,7 @@ def crearematrice():
     logic.sec_vars.clear()
     logic.variables_dict.clear()
     logic.vars_list.clear()
+    logic.steps.clear()
     linia = request.form.get('linia')
     try:
         linia = int(linia)
@@ -30,15 +31,16 @@ def rezultat():
     for i in range(linia):
         logic.system.append(request.form.get(f"matriceaIntrodusa_{i}"))
     logic.main()
+    print(logic.vars_list)
     return render_template('rezultat.html',
                            matrix = logic.matrix,
                            matrices = logic.gauss_steps,
-                           matrix_type=logic.matrix_type,
+                           matrix_type = logic.matrix_type,
                            main_vars = logic.main_vars,
-                           sec_vars=logic.sec_vars,
+                           sec_vars = logic.sec_vars,
                            vars_list = logic.vars_list,
-                           vars_index = logic.vars_index,
-                           var_sol=logic.variables_dict)
+                           var_sol = logic.variables_dict,
+                           steps = logic.steps)
 
 if __name__ == "__main__":
     app.run(debug=True)

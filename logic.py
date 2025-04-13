@@ -8,7 +8,7 @@ gauss_steps = []
 main_vars = []
 sec_vars = []
 vars_list = []
-vars_index = 0
+steps = []
 variables_dict = {}
 matrix_type = " "
 
@@ -29,7 +29,7 @@ def print_system(system):
 def print_matrix(matrix, vars):
     for row in matrix:
         print(row)
-    print(vars, "\n")
+    print(vars)
 
 def parse_equations(inp):
     vars = []  # List to store all unique variables
@@ -111,11 +111,16 @@ def switch_cols(matrix, current_index, vars):
 
     # Interchange the variables
     vars[current_index], vars[index] = vars[index], vars[current_index]
+    gauss_steps.append([row[:] for row in matrix])
+    vars_list.append(vars.copy())
+    print_matrix(matrix, vars)
+    print(f"Schimbare coloana {current_index + 1} cu coloana {index + 1} \n")
+    steps.append(f"Schimbare coloana {current_index + 1} cu coloana {index + 1} \n")
     vars_list.append(vars.copy())
 
     return matrix
 
-def switch_rows(matrix, current_index):
+def switch_rows(matrix, current_index, vars):
     n = len(matrix)
     index = current_index
     col = current_index
@@ -128,6 +133,12 @@ def switch_rows(matrix, current_index):
 
     # Interchange the rows
     matrix[current_index], matrix[index] = matrix[index], matrix[current_index]
+    gauss_steps.append([row[:] for row in matrix])
+    print_matrix(matrix, vars)
+    print(f"Schimbare randul {current_index + 1} cu randul {index + 1} \n")
+    steps.append(f"Schimbare rândul {current_index + 1} cu rândul {index + 1} \n")
+    vars_list.append(vars.copy())
+
     return True
 
 def calculate_matrix(matrix, index):
@@ -220,7 +231,10 @@ def row_simplification(matrix, vars):
                 row[i] = int(row[i]) // row_gcd
 
     print_matrix(matrix, vars)
+    print("Simplificare \n")
+    steps.append("Simplificare \n")
     gauss_steps.append([row[:] for row in matrix])
+    vars_list.append(vars.copy())
     return matrix
 
 def simplify(solution):
@@ -265,7 +279,7 @@ def gauss(matrix, vars):
 
         if pivot == 0:
             # Attempt to swap rows
-            if not switch_rows(matrix, index):
+            if not switch_rows(matrix, index, vars):
                 # Handle the case where swapping rows is not possible
                 if not switch_cols(matrix, index, vars):
                     if matrix[index][-1] != 0:
@@ -277,6 +291,9 @@ def gauss(matrix, vars):
         matrix = calculate_matrix(matrix, index)
         gauss_steps.append([row[:] for row in matrix])
         print_matrix(matrix, vars)
+        print("Regula triughiului \n")
+        steps.append("Regula triughiului \n")
+        vars_list.append(vars.copy())
 
     variables_dict = calculate_variables(matrix, vars)
     print(f"Solutia sistemului este: {variables_dict}")
