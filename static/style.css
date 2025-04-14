@@ -105,7 +105,7 @@ body{
     align-items: center;
    
     color: #4CAF50;   
-    font-size:3em; 
+    font-size:1.5vw;
     font-weight: bold; 
     transition: color 0.3s ease; 
 }
@@ -164,15 +164,15 @@ body{
     margin:10px;
 }
 .returnhome{
-    width:10vh;
-    height:5vh;
+    width:15vh;
+    height:7.5vh;
     border-radius: 10px;
     border:none;
     background-color: #ffffff;
     justify-content: center;
     align-items: center;
     color: #4CAF50;   
-    font-size:3em; 
+    font-size:2.5vw;
     font-weight: bold; 
     transition: color 0.3s ease; 
 }
@@ -189,8 +189,8 @@ body{
 .generarebtn .confirmbtn{
     display:flex;
     position:absolute;
-    width:10vh;
-    height:5vh;
+    width:15vh;
+    height:7.5vh;
     top:1%;
     right:.5%;
     border-radius: 10px;
@@ -199,7 +199,7 @@ body{
     justify-content: center;
     align-items: center;
     color: #4CAF50;   
-    font-size:1.1em; 
+    font-size:1.5vw;
     font-weight: bold; 
     transition: color 0.3s ease; 
 }
