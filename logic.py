@@ -184,10 +184,12 @@ def calculate_variables(matrix, vars):
         for col in range(row, m):
             cnt += 1
             if matrix[row][col] != 0:
+                # Main variable
                 if vars[col] in pivot_pos and vars[col] not in main_vars and cnt == 1:
                     main_var = vars[col]  # The first variable in the equation is the main one
                     main_vars.append(main_var)
-                elif vars[col] not in pivot_pos:
+                # First occurrence of a secondary variable
+                elif vars[col] not in pivot_pos and vars[col] not in sec_vars:
                     # Assign a secondary variable name if not already assigned
                     variables_dict[vars[col]] = GREEK_LETTERS[sec_index]
                     sec_vars.append(vars[col])
@@ -195,18 +197,19 @@ def calculate_variables(matrix, vars):
 
                     # Append the secondary variable term as a string
                     solution += f" +{-1 * matrix[row][col]}{variables_dict[vars[col]]}"
-                elif matrix[col][col+1] != 0:
-                    solution += f" +{-1 * matrix[row][col]}"
+                # Takes the value of another main variable
+                elif n == m and matrix[col][col] != 0:
+                    solution += f" +{-1 * matrix[row][col] * matrix[row][-1]}"
+                # Next occurrence/s of the a secondary variable
+                else:
+                    solution += f" +{matrix[row][col]}{variables_dict[vars[col]]}"
 
         # Append the main variables
         solution += f") / {matrix[row][row]}"
-        variables_dict[main_var] = simplify(solution)
+        if main_var:
+            variables_dict[main_var] = simplify(solution)
 
-    variables_dict.pop(None, None)
-    print(variables_dict)
-    keys = list(variables_dict.keys())
-    keys.sort()
-    variables_dict = {i: variables_dict[i] for i in variables_dict.keys()}
+    variables_dict = dict(sorted(variables_dict.items()))
 
     if sec_index == 0:
         print("Sistemul este compatibil determinat")
@@ -247,20 +250,22 @@ def simplify(solution):
 
     left = left.strip("()")
     parts = left.split(" ")
-    left = ""
-    for part in parts:
-        if negative:
-            part = "-" + part
-        sign = 1
-        for char in part:
-            if char not in "+-":
-                break
-            if char == "-":
-                sign *= -1
-        part = part.strip("+-")
-        left += (" + " if sign == 1 else " - ") + part
-    left = left.strip("+ ")
-    if right == "1":
+    if left != '0':
+        left = ""
+        for part in parts:
+            if negative:
+                part = "-" + part
+            sign = 1
+            for char in part:
+                if char not in "+-":
+                    break
+                if char == "-":
+                    sign *= -1
+            part = part.strip("+-")
+            if part != '0':
+                left += (" + " if sign == 1 else " - ") + part
+        left = left.strip("+ ")
+    if right == "1" or left == '0':
         return left
     elif len(parts) == 1:
         return f"{left} / {right}"
@@ -272,10 +277,17 @@ def gauss(matrix, vars):
     global matrix_type
 
     n = len(matrix)
+    m = len(matrix[0]) - 1
     print("Calculele cu metoda Gauss:")
 
     for index in range(n):
-        pivot = matrix[index][index]
+        pivot = None
+        if index <= m:
+            pivot = matrix[index][index]
+        elif matrix[index][-1] != 0:
+            matrix_type = "Sistemul este incompatibil"
+            print("Sistemul este incompatibil")
+            return
 
         if pivot == 0:
             # Attempt to swap rows
@@ -304,24 +316,23 @@ def main():
     global matrix
     print("Introduceti ecuatiile sistemului: ")
     # system = input_system()
-    system = [
-        # "x+y+z=3",
-        # "2x-y+3z=4",
-        # "3x+2y-z=4"
-
-        "-x3+4x4=2",
-        "x1-2x2+4x3+3x4=4",
-        "3x1-6x2+8x3+5x4=0",
-
-        # "3x-6y+12z=6",
-        # "-2x+5y-9z=-7",
-        # "-x+3y-5z=-4"
-
-        # "3x-3y+2z=0",
-        # "6x-6y+4z=0",
-        # "4x-4y+3z=0"
-
-    ]
+    # system = [
+    #     # "x+y+z=3",
+    #     # "2x-y+3z=4",
+    #     # "3x+2y-z=4"
+    #
+    #     # "-x3+4x4=2",
+    #     # "x1-2x2+4x3+3x4=4",
+    #     # "3x1-6x2+8x3+5x4=0",
+    #
+    #     # "3x-6y+12z=6",
+    #     # "-2x+5y-9z=-7",
+    #     # "-x+3y-5z=-4"
+    #
+    #     # "3x-3y+2z=0",
+    #     # "6x-6y+4z=0",
+    #     # "4x-4y+3z=0"
+    # ]
     print("Ecuatiile introduse sunt:")
     print_system(system)
 
@@ -337,6 +348,6 @@ def main():
     print("Variabilele:", vars)
     print("Matricea sistemului:")
     print_matrix(matrix,vars)
-    gauss(matrix, vars)
+    gauss(matrix.copy(), vars)
 
-main()
+# main()

@@ -89,10 +89,11 @@ Metoda lui GAUSS | REZULTAT
             {% for var, frac in var_sol.items() %}
                 <div class="block-fractie">
                     <div class="nume-var">{{ var }} =</div>
-                    {% if frac.numarator is defined and frac.numitor is defined %}
+                    {% if '/' in frac %}
+                        {% set parts = frac.split(' / ') %}
                         <div class="fractie">
-                            <div class="numarator">{{ frac.numarator }}</div>
-                            <div class="numitor">{{ frac.numitor }}</div>
+                            <div class="numarator">{{ parts[0] }}</div>
+                            <div class="numitor">{{ parts[1] }}</div>
                         </div>
                     {% else %}
                         <span>{{ frac }}</span>
