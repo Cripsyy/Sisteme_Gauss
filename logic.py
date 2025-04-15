@@ -200,9 +200,9 @@ def calculate_variables(matrix, vars):
                 # Takes the value of another main variable
                 elif n == m and matrix[col][col] != 0:
                     solution += f" +{-1 * matrix[row][col] * matrix[row][-1]}"
-                # Next occurrence/s of the a secondary variable
+                # Next occurrence/s of a secondary variable
                 else:
-                    solution += f" +{matrix[row][col]}{variables_dict[vars[col]]}"
+                    solution += f" +{-1 * matrix[row][col]}{variables_dict[vars[col]]}"
 
         # Append the main variables
         solution += f") / {matrix[row][row]}"
@@ -320,7 +320,7 @@ def main():
     #     # "x+y+z=3",
     #     # "2x-y+3z=4",
     #     # "3x+2y-z=4"
-    #
+    #     #
     #     # "-x3+4x4=2",
     #     # "x1-2x2+4x3+3x4=4",
     #     # "3x1-6x2+8x3+5x4=0",
